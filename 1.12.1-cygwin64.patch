@@ -1,0 +1,47 @@
+--- origsrc/krb5-1.12.1/src/lib/krb5/os/hostrealm.c	2014-05-19 03:16:43.836348600 -0500
++++ src/krb5-1.12.1/src/lib/krb5/os/hostrealm.c	2014-05-19 03:13:56.000000000 -0500
+@@ -36,7 +36,7 @@
+ #include <krb5/hostrealm_plugin.h>
+ #include <ctype.h>
+ 
+-#if defined(_WIN32) && !defined(__CYGWIN32__)
++#if defined(_WIN32) && !defined(__CYGWIN__)
+ #ifndef EAFNOSUPPORT
+ #define EAFNOSUPPORT WSAEAFNOSUPPORT
+ #endif
+--- origsrc/krb5-1.12.1/src/lib/krb5/os/prompter.c	2014-05-19 03:16:43.847850100 -0500
++++ src/krb5-1.12.1/src/lib/krb5/os/prompter.c	2014-05-19 03:13:56.000000000 -0500
+@@ -1,7 +1,7 @@
+ /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+ #include "k5-int.h"
+ #include "os-proto.h"
+-#if !defined(_WIN32) || (defined(_WIN32) && defined(__CYGWIN32__))
++#if !defined(_WIN32) || (defined(_WIN32) && defined(__CYGWIN__))
+ #include <stdio.h>
+ #include <errno.h>
+ #include <signal.h>
+--- origsrc/krb5-1.12.1/src/plugins/kdb/db2/libdb2/btree/bt_open.c	2014-05-19 03:16:43.858851500 -0500
++++ src/krb5-1.12.1/src/plugins/kdb/db2/libdb2/btree/bt_open.c	2014-05-19 03:16:17.456498800 -0500
+@@ -57,6 +57,9 @@ static char sccsid[] = "@(#)bt_open.c	8.
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++#ifdef __CYGWIN__
++#include <io.h>
++#endif
+ 
+ #include "k5-platform.h"	/* mkstemp? */
+ 
+@@ -431,10 +434,10 @@ tmp()
+ #else
+ 	sigsetmask(oset);
+ #endif
+-#ifdef __CYGWIN32__
++#ifdef __CYGWIN__
+       /* Ensure the fd is in binary mode. */
+       setmode(fd, O_BINARY);
+-#endif /* __CYGWIN32__ */
++#endif /* __CYGWIN__ */
+ 
+ 	return(fd);
+ }

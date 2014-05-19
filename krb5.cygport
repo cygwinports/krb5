@@ -14,6 +14,7 @@ PATCH_URI="
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.12.1-cygwin-in_pktinfo.patch
+	1.12.1-cygwin64.patch
 "
 
 src_compile() {
