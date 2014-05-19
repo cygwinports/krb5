@@ -1,0 +1,343 @@
+--- origsrc/krb5-1.12.1/src/aclocal.m4	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/aclocal.m4	2014-05-18 14:52:41.280747700 -0500
+@@ -1157,6 +1157,12 @@ else
+ 		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
+ 		LIBINSTLIST="install-shared"
+ 		;;
++	.dll.a)
++		DEPLIBEXT=.dll.a
++		LIBLIST='cyg$(LIBBASE)$(SHLIBVEXT)'
++		LIBLINKS='$(TOPLIBD)/cyg$(LIBBASE)$(SHLIBVEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
++		LIBINSTLIST="install-dlls"
++		;;
+ 	*)
+ 		LIBLIST='lib$(LIBBASE)$(SHLIBEXT) lib$(LIBBASE)$(SHLIBSEXT)'
+ 		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
+--- origsrc/krb5-1.12.1/src/config/lib.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/config/lib.in	2014-05-18 15:02:24.601111700 -0500
+@@ -38,12 +38,21 @@ lib$(LIBBASE)$(SHLIBVEXT): $(SHOBJLISTS)
+ 	@echo "building shared $(LIBBASE) library ($(LIBMAJOR).$(LIBMINOR))"
+ 	set -x; objlist=`$(PARSE_OBJLISTS) $(SHOBJLISTS)` && $(MAKE_SHLIB_COMMAND)
+ 
++cyg$(LIBBASE)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
++	$(RM) $@
++	@echo "building shared $(LIBBASE) library ($(LIBMAJOR))"
++	set -x; objlist=`$(PARSE_OBJLISTS) $(SHOBJLISTS)` && $(MAKE_SHLIB_COMMAND)
++
++ifeq ($(SHLIBEXT),.dll)
++lib$(LIBBASE)$(SHLIBSEXT): cyg$(LIBBASE)$(SHLIBVEXT)
++else
+ lib$(LIBBASE)$(SHLIBSEXT): lib$(LIBBASE)$(SHLIBVEXT)
+ 	$(RM) $@
+ 	$(LN_S) lib$(LIBBASE)$(SHLIBVEXT) $@
+ lib$(LIBBASE)$(SHLIBEXT): lib$(LIBBASE)$(SHLIBVEXT)
+ 	$(RM) $@
+ 	$(LN_S) lib$(LIBBASE)$(SHLIBVEXT) $@
++endif
+ 
+ binutils.versions: $(SHLIB_EXPORT_FILE) Makefile
+ 	base=`echo "$(LIBBASE)" | sed -e 's/-/_/'`; \
+@@ -100,6 +110,14 @@ $(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT): lib
+ 	$(RM) $@
+ 	(cd $(TOPLIBD) && \
+ 	 $(LN_S) lib$(LIBBASE)$(SHLIBVEXT) lib$(LIBBASE)$(SHLIBEXT))
++ifeq ($(SHLIBEXT),.dll)
++$(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT): lib$(LIBBASE)$(SHLIBSEXT)
++	$(RM) $@
++	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBSEXT) .)
++$(TOPLIBD)/cyg$(LIBBASE)$(SHLIBVEXT): cyg$(LIBBASE)$(SHLIBVEXT)
++	$(RM) $@
++	(cd $(TOPLIBD) && cp $(RELDIR)/cyg$(LIBBASE)$(SHLIBVEXT) .)
++else
+ $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT): lib$(LIBBASE)$(SHLIBSEXT)
+ 	$(RM) $@
+ 	(cd $(TOPLIBD) && \
+@@ -107,6 +125,7 @@ $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT): li
+ $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT): lib$(LIBBASE)$(SHLIBVEXT)
+ 	$(RM) $@
+ 	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBVEXT) .)
++endif
+ $(TOPLIBD)/lib$(LIBBASE)$(PFLIBEXT): lib$(LIBBASE)$(PFLIBEXT)
+ 	$(RM) $@
+ 	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(PFLIBEXT) .)
+@@ -144,6 +163,11 @@ install-shlib-soname: install-shared
+ 	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(SHLIBSEXT)
+ 	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIBBASE)$(SHLIBVEXT) \
+ 		lib$(LIBBASE)$(SHLIBSEXT))
++install-dlls:
++	$(RM) $(DESTDIR)$(KRB5_BINDIR)/cyg$(LIBBASE)$(SHLIBVEXT)
++	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(SHLIBEXT)
++	$(INSTALL_SHLIB) cyg$(LIBBASE)$(SHLIBVEXT) $(DESTDIR)$(CLIENT_BINDIR)
++	$(INSTALL_DATA) lib$(LIBBASE)$(SHLIBSEXT) $(DESTDIR)$(KRB5_LIBDIR)
+ install-profiled:
+ 	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(PFLIBEXT)
+ 	$(INSTALL_DATA) lib$(LIBBASE)$(PFLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
+--- origsrc/krb5-1.12.1/src/config/shlib.conf	2014-05-18 14:44:56.630171200 -0500
++++ src/krb5-1.12.1/src/config/shlib.conf	2014-05-18 14:40:27.229762400 -0500
+@@ -532,6 +532,21 @@ mips-*-netbsd*)
+ 	RUN_ENV='LIBPATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/lib:/usr/local/lib; export LIBPATH; '
+ 	RUN_VARS='LIBPATH'
+ 	;;
++
++*-*-cygwin*)
++	SHLIBVEXT='-$(LIBMAJOR).dll'
++	SHLIBSEXT=.dll.a
++	SHLIBEXT=.dll
++	# PE platforms don't need separate PIC objects
++	SHOBJEXT=.o
++	SHLIB_EXPFLAGS='$(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
++	LDCOMBINE='$(CC) $(CFLAGS) $(PTHREAD_CFLAGS) -shared -Wl,--out-implib,lib$(LIBBASE)$(SHLIBSEXT)'
++	PROFFLAGS=-pg
++	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) $(PROG_RPATH_FLAGS) $(CFLAGS) $(PTHREAD_CFLAGS) $(LDFLAGS)'
++	CXX_LINK_SHARED='$(CXX) $(PROG_LIBPATH) $(PROG_RPATH_FLAGS) $(CXXFLAGS) $(PTHREAD_CFLAGS) $(LDFLAGS)'
++	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH) $(CFLAGS) $(PTHREAD_CFLAGS) $(LDFLAGS)'
++	CXX_LINK_STATIC='$(CXX) $(PROG_LIBPATH) $(CXXFLAGS) $(PTHREAD_CFLAGS) $(LDFLAGS)'
++	;;
+ esac
+ 
+ if test "${MAKE_SHLIB_COMMAND}" = "x" ; then
+--- origsrc/krb5-1.12.1/src/lib/kadm5/clnt/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/lib/kadm5/clnt/Makefile.in	2014-05-18 15:08:31.191079500 -0500
+@@ -7,10 +7,10 @@ LIBMAJOR=9
+ LIBMINOR=0
+ STOBJLISTS=../OBJS.ST OBJS.ST
+ SHLIB_EXPDEPS=\
+-	$(TOPLIBD)/libgssrpc$(SHLIBEXT) \
+-	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
++	$(GSSRPC_DEPLIB) \
++	$(GSS_DEPLIB) \
++	$(KRB5_DEPLIB) \
++	$(CRYPTO_DEPLIB) \
+ 	$(COM_ERR_DEPLIB) $(SUPPORT_LIBDEP)
+ SHLIB_EXPLIBS=-lgssrpc -lgssapi_krb5 -lkrb5 -lk5crypto $(SUPPORT_LIB) -lcom_err $(LIBS)
+ RELDIR=kadm5/clnt
+--- origsrc/krb5-1.12.1/src/lib/kadm5/srv/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/lib/kadm5/srv/Makefile.in	2014-05-18 15:08:36.138362400 -0500
+@@ -14,11 +14,11 @@ LIBMINOR=0
+ STOBJLISTS=../OBJS.ST OBJS.ST
+ 
+ SHLIB_EXPDEPS=\
+-	$(TOPLIBD)/libgssrpc$(SHLIBEXT) \
+-	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
+-	$(TOPLIBD)/libkdb5$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
++	$(GSSRPC_DEPLIB) \
++	$(GSS_DEPLIB) \
++	$(KDB5_DEPLIB) \
++	$(KRB5_DEPLIB) \
++	$(CRYPTO_DEPLIB) \
+ 	$(COM_ERR_DEPLIB) $(SUPPORT_LIBDEP)
+ SHLIB_EXPLIBS =	-lgssrpc -lgssapi_krb5 -lkdb5 $(KDB5_DB_LIB) \
+ 		-lkrb5 -lk5crypto $(SUPPORT_LIB) -lcom_err @GEN_LIB@ $(LIBS)
+--- origsrc/krb5-1.12.1/src/lib/kdb/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/lib/kdb/Makefile.in	2014-05-18 15:07:59.201249800 -0500
+@@ -13,9 +13,9 @@ RELDIR=kdb
+ # Depends on libk5crypto and libkrb5
+ 
+ SHLIB_EXPDEPS = \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libgssrpc$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++	$(CRYPTO_DEPLIB) \
++	$(GSSRPC_DEPLIB) \
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS=-lgssrpc -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
+ 
+ adb_err.$(OBJEXT): adb_err.c
+--- origsrc/krb5-1.12.1/src/lib/krb5/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/lib/krb5/Makefile.in	2014-05-18 15:06:16.316365100 -0500
+@@ -54,7 +54,7 @@ SRCS=\
+ 
+ RELDIR=krb5
+ SHLIB_EXPDEPS = \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
++	$(CRYPTO_DEPLIB) \
+ 	$(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+ SHLIB_EXPLIBS=-lk5crypto -lcom_err $(SUPPORT_LIB) @GEN_LIB@ $(LIBS)
+ 
+--- origsrc/krb5-1.12.1/src/lib/rpc/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/lib/rpc/Makefile.in	2014-05-18 15:07:11.022494100 -0500
+@@ -11,9 +11,9 @@ LIBBASE=gssrpc
+ LIBMAJOR=4
+ LIBMINOR=2
+ SHLIB_EXPDEPS= \
+-	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
++	$(GSS_DEPLIB) \
++	$(KRB5_DEPLIB) \
++	$(CRYPTO_DEPLIB) \
+ 	$(COM_ERR_DEPLIB)
+ SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err $(LIBS)
+ RELDIR=rpc
+--- origsrc/krb5-1.12.1/src/plugins/authdata/greet_client/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/authdata/greet_client/Makefile.in	2014-05-18 15:09:28.784373600 -0500
+@@ -5,8 +5,8 @@ MODULE_INSTALL_DIR = $(KRB5_AD_MODULE_DI
+ LIBBASE=greet_client
+ LIBMAJOR=0
+ LIBMINOR=0
+-SHLIB_EXPDEPS = $(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++SHLIB_EXPDEPS = $(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
+ STLIBOBJS= greet.o
+ 
+--- origsrc/krb5-1.12.1/src/plugins/authdata/greet_server/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/authdata/greet_server/Makefile.in	2014-05-18 15:09:35.311747000 -0500
+@@ -5,8 +5,8 @@ MODULE_INSTALL_DIR = $(KRB5_AD_MODULE_DI
+ LIBBASE=greet_server
+ LIBMAJOR=1
+ LIBMINOR=0
+-SHLIB_EXPDEPS = $(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++SHLIB_EXPDEPS = $(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
+ 
+ STLIBOBJS= greet_auth.o
+--- origsrc/krb5-1.12.1/src/plugins/kadm5_hook/test/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/kadm5_hook/test/Makefile.in	2014-05-18 15:09:41.010072900 -0500
+@@ -7,8 +7,8 @@ LIBMINOR=0
+ RELDIR=../plugins/kadm5_hook/test
+ # Depends on libk5crypto and libkrb5
+ SHLIB_EXPDEPS = \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++	$(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
+ 
+ STLIBOBJS=main.o
+--- origsrc/krb5-1.12.1/src/plugins/kdb/db2/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/kdb/db2/Makefile.in	2014-05-18 15:09:45.794346500 -0500
+@@ -29,8 +29,8 @@ RELDIR=../plugins/kdb/db2
+ # Also on gssrpc, for xdr stuff.
+ SHLIB_EXPDEPS = \
+ 	$(GSSRPC_DEPLIBS) \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++	$(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(KADMSRV_LIBS) $(SUPPORT_LIB) $(LIBS) @DB_EXTRA_LIBS@
+ 
+ DBDIR = libdb2
+--- origsrc/krb5-1.12.1/src/plugins/kdb/hdb/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/kdb/hdb/Makefile.in	2014-05-18 15:09:56.536961000 -0500
+@@ -14,9 +14,9 @@ RELDIR=../plugins/kdb/hdb
+ # Also on gssrpc, for xdr stuff.
+ SHLIB_EXPDEPS = \
+ 	$(GSSRPC_DEPLIBS) \
+-	$(TOPLIBD)/libkdb5$(SHLIBEXT) \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++	$(KDB5_DEPLIB) \
++	$(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkdb5 -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(SUPPORT_LIB) $(LIBS) @DB_EXTRA_LIBS@
+ 
+ SRCS= \
+--- origsrc/krb5-1.12.1/src/plugins/kdb/ldap/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/kdb/ldap/Makefile.in	2014-05-18 15:10:25.665627000 -0500
+@@ -14,16 +14,16 @@ RELDIR=../plugins/kdb/ldap
+ # Depends on libk5crypto and libkrb5
+ # Also on gssrpc, for xdr stuff.
+ SHLIB_EXPDEPS = \
+-	$(TOPLIBD)/libkdb_ldap$(SHLIBEXT) \
++	$(TOPLIBD)/libkdb_ldap$(DEPLIBEXT) \
+ 	$(GSSRPC_DEPLIBS) \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+-	$(TOPLIBD)/lib$(SUPPORT_LIBNAME)$(SHLIBEXT)
++	$(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB) \
++	$(SUPPORT_DEPLIB)
+ SHLIB_EXPLIBS= -lkdb_ldap $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto -lkrb5support $(LIBS)
+ 
+ SRCS= 	$(srcdir)/ldap_exp.c
+ 
+-$(TOPLIBD)/libkdb_ldap$(SHLIBEXT) : all-recurse
++$(TOPLIBD)/libkdb_ldap$(DEPLIBEXT) : all-recurse
+ 
+ STLIBOBJS= ldap_exp.o
+ 
+--- origsrc/krb5-1.12.1/src/plugins/kdb/ldap/libkdb_ldap/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/kdb/ldap/libkdb_ldap/Makefile.in	2014-05-18 15:11:55.135744400 -0500
+@@ -19,9 +19,9 @@ RELDIR=../plugins/kdb/ldap/libkdb_ldap
+ # Also on gssrpc, for xdr stuff.
+ SHLIB_EXPDEPS = \
+ 	$(GSSRPC_DEPLIBS) \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
++	$(CRYPTO_DEPLIB) \
+ 	$(SUPPORT_DEPLIB) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS= $(KADMSRV_LIBS) -lkrb5 -lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) $(LDAP_LIBS) $(LIBS)
+ 
+ LIBINITFUNC= kldap_init_fn
+--- origsrc/krb5-1.12.1/src/plugins/preauth/cksum_body/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/preauth/cksum_body/Makefile.in	2014-05-18 15:10:35.380182700 -0500
+@@ -8,8 +8,8 @@ LIBMINOR=0
+ RELDIR=../plugins/preauth/cksum_body
+ # Depends on libk5crypto and libkrb5
+ SHLIB_EXPDEPS = \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++	$(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
+ 
+ STLIBOBJS=cksum_body_main.o
+--- origsrc/krb5-1.12.1/src/plugins/preauth/otp/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/preauth/otp/Makefile.in	2014-05-18 15:10:42.777605800 -0500
+@@ -8,7 +8,7 @@ LIBMINOR=0
+ RELDIR=../plugins/preauth/otp
+ 
+ SHLIB_EXPDEPS = $(VERTO_DEPLIBS) $(KRB5_BASE_DEPLIBS) \
+-	$(TOPLIBD)/libkrad$(SHLIBEXT)
++	$(TOPLIBD)/libkrad$(DEPLIBEXT)
+ 
+ SHLIB_EXPLIBS= -lkrad $(VERTO_LIBS) $(KRB5_BASE_LIBS)
+ 
+--- origsrc/krb5-1.12.1/src/plugins/preauth/pkinit/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/preauth/pkinit/Makefile.in	2014-05-18 15:10:46.909842100 -0500
+@@ -9,8 +9,8 @@ LIBMINOR=0
+ RELDIR=../plugins/preauth/pkinit
+ # Depends on libk5crypto and libkrb5
+ SHLIB_EXPDEPS = \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++	$(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(PKINIT_CRYPTO_IMPL_LIBS) $(DL_LIB) $(SUPPORT_LIB) $(LIBS)
+ DEFINES=-DPKINIT_DYNOBJEXT=\""$(PKINIT_DYNOBJEXT)"\"
+ 
+--- origsrc/krb5-1.12.1/src/plugins/preauth/securid_sam2/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/preauth/securid_sam2/Makefile.in	2014-05-18 15:10:51.750119000 -0500
+@@ -9,8 +9,8 @@ LIBMINOR=0
+ RELDIR=../plugins/preauth/securid_sam2
+ # Depends on libk5crypto and libkrb5
+ SHLIB_EXPDEPS = \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT) $(KADMSRV_DEPLIBS)
++	$(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB) $(KADMSRV_DEPLIBS)
+ ACELIB= -laceclnt
+ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(KADMSRV_LIBS) \
+ 	$(LIBS) $(ACELIB)
+--- origsrc/krb5-1.12.1/src/plugins/preauth/wpse/Makefile.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/plugins/preauth/wpse/Makefile.in	2014-05-18 15:10:55.307322400 -0500
+@@ -8,8 +8,8 @@ LIBMINOR=0
+ RELDIR=../plugins/preauth/wpse
+ # Depends on libk5crypto and libkrb5
+ SHLIB_EXPDEPS = \
+-	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
++	$(CRYPTO_DEPLIB) \
++	$(KRB5_DEPLIB)
+ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
+ 
+ STLIBOBJS=wpse_main.o

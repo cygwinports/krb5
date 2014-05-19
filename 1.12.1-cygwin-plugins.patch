@@ -1,0 +1,22 @@
+--- origsrc/krb5-1.12.1/src/tests/shlib/t_loader.c	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/tests/shlib/t_loader.c	2014-05-19 00:26:21.189571500 -0500
+@@ -68,6 +68,8 @@ static void do_close_1(void *libhandle,
+ 
+ #ifdef _AIX
+ # define SHLIB_SUFFIX ".a"
++#elif defined __CYGWIN__
++# define SHLIB_SUFFIX ".dll"
+ #else
+ # define SHLIB_SUFFIX ".so"
+ #endif
+--- origsrc/krb5-1.12.1/src/util/support/plugins.c	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/util/support/plugins.c	2014-05-19 00:24:11.490153100 -0500
+@@ -492,7 +492,7 @@ krb5int_plugin_file_handle_array_free (s
+ 
+ #if TARGET_OS_MAC
+ #define FILEEXTS { "", ".bundle", ".dylib", ".so", NULL }
+-#elif defined(_WIN32)
++#elif defined(_WIN32) || defined(__CYGWIN__)
+ #define FILEEXTS  { "", ".dll", NULL }
+ #else
+ #define FILEEXTS  { "", ".so", NULL }
