@@ -42,6 +42,9 @@ src_install() {
 	cd ${B}
 	cyginstall EXAMPLEDIR=/usr/share/doc/${NAME}/examples
 
+	# internal library
+	rm -f ${D}/usr/lib/libkdb_ldap.dll.a
+
 	dodoc ${S}/doc/html
 }
 
