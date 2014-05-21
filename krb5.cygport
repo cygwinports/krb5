@@ -14,6 +14,7 @@ PATCH_URI="
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.12.1-cygwin-in_pktinfo.patch
+	1.12.1-cygwin-yasm.patch
 	1.12.1-cygwin64.patch
 "
 
@@ -25,7 +26,6 @@ src_compile() {
 	cygconf \
 		--enable-dns-for-realm \
 		--enable-pkinit --with-pkinit-crypto-impl=openssl \
-		--with-crypto-impl=openssl \
 		--with-ldap \
 		--with-system-et \
 		--with-system-ss \

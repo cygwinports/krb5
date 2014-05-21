@@ -1,0 +1,42 @@
+--- origsrc/krb5-1.12.1/src/configure.in	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/configure.in	2014-05-20 14:24:49.114439100 -0500
+@@ -277,6 +277,12 @@ if test "$CRYPTO_IMPL" = builtin -a "x$e
+ 	# use the System V x86-64 calling convention.
+ 	aesni_flags="-D__linux__ -f elf -m $aesni_machine"
+ 	;;
++    i?86-*-cygwin*)
++	aesni_flags="-DUNDERSCORE -f win32"
++	;;
++    x86_64-*-cygwin*)
++	aesni_flags="-f win64"
++	;;
+     esac
+     if test "x$aesni_obj" != x && test "x$aesni_flags" != x; then
+ 	AC_CHECK_PROG(YASM,yasm,yasm)
+--- origsrc/krb5-1.12.1/src/lib/crypto/builtin/aes/iaesx86.s	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/lib/crypto/builtin/aes/iaesx86.s	2014-05-21 01:18:59.677627600 -0500
+@@ -27,6 +27,16 @@
+ ; OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ ; ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
++%ifdef UNDERSCORE
++%define _iEncExpandKey128 _k5_iEncExpandKey128
++%define _iEncExpandKey256 _k5_iEncExpandKey256
++%define _iDecExpandKey128 _k5_iDecExpandKey128
++%define _iDecExpandKey256 _k5_iDecExpandKey256
++%define _iEnc128_CBC      _k5_iEnc128_CBC
++%define _iEnc256_CBC      _k5_iEnc256_CBC
++%define _iDec128_CBC      _k5_iDec128_CBC
++%define _iDec256_CBC      _k5_iDec256_CBC
++%else
+ %define _iEncExpandKey128 k5_iEncExpandKey128
+ %define _iEncExpandKey256 k5_iEncExpandKey256
+ %define _iDecExpandKey128 k5_iDecExpandKey128
+@@ -35,6 +45,7 @@
+ %define _iEnc256_CBC      k5_iEnc256_CBC
+ %define _iDec128_CBC      k5_iDec128_CBC
+ %define _iDec256_CBC      k5_iDec256_CBC
++%endif
+ 
+ %macro inversekey 1
+ 	movdqu  xmm1,%1
