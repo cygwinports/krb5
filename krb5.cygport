@@ -16,6 +16,7 @@ PATCH_URI="
 	1.12.1-cygwin-in_pktinfo.patch
 	1.12.1-cygwin-yasm.patch
 	1.12.1-cygwin64.patch
+	1.12.1-cygwin-profile.h.patch
 "
 
 src_compile() {

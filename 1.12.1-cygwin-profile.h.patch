@@ -1,0 +1,16 @@
+This shadows w32api <profile.h> and causes Cygwin libgmon build to fail.
+
+--- origsrc/krb5-1.12.1/src/util/profile/profile.hin	2014-01-15 18:44:15.000000000 -0600
++++ src/krb5-1.12.1/src/util/profile/profile.hin	2014-05-22 00:48:08.121916600 -0500
+@@ -2,6 +2,11 @@
+  * profile.h
+  */
+ 
++#ifdef _SYS_GMON_H_
++#include_next <profile.h>
++#define _KRB5_PROFILE_H
++#endif
++
+ #ifndef _KRB5_PROFILE_H
+ #define _KRB5_PROFILE_H
+ 
