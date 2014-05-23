@@ -1,6 +1,6 @@
 NAME="krb5"
 VERSION=1.12.1
-RELEASE=1
+RELEASE=2
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
 DESCRIPTION="Kerberos is a network authentication protocol. It is designed to
