@@ -54,7 +54,6 @@ PKG_NAMES="krb5-workstation krb5-server krb5-doc libgssapi_krb5_2 libgssrpc4
 	libkrb5_3 libkrb5support0 libkrb5-devel"
 krb5_workstation_CATEGORY="Net"
 krb5_workstation_SUMMARY="${SUMMARY} clients"
-krb5_workstation_OBSOLETES="heimdal"
 krb5_workstation_CONTENTS="--exclude=examples --exclude=html --exclude=*.dll
 	--exclude=krb5-config* usr/bin/ usr/share/doc/ usr/share/locale/
 	usr/share/man/man1/ usr/share/man/man5/krb5.conf.5*"
