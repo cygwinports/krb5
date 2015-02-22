@@ -1,5 +1,5 @@
 NAME="krb5"
-VERSION=1.12.2
+VERSION=1.13.1
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
@@ -8,9 +8,18 @@ provide strong authentication for client/server applications by using secret-
 key cryptography."
 HOMEPAGE="http://web.mit.edu/kerberos/"
 #SRC_URI="http://web.mit.edu/kerberos/dist/krb5/${VERSION%.*}/krb5-${VERSION}-signed.tar"
-md5sum=8777a835ae84f7d2f5872bf388bc6d76
+md5sum=317dc7db815f1e4ad611c6a519589edd
 SRC_URI="http://pkgs.fedoraproject.org/repo/pkgs/krb5/krb5-${VERSION}.tar.gz/${md5sum}/krb5-${VERSION}.tar.gz"
 PATCH_URI="
+	fedora/krb5-1.12-ksu-path.patch
+	fedora/krb5-1.12-ktany.patch
+	fedora/krb5-1.3.1-dns.patch
+	fedora/krb5-1.12-api.patch
+	fedora/krb5-1.13-dirsrv-accountlock.patch
+	fedora/krb5-1.9-debuginfo.patch
+	fedora/krb5-kvno-230379.patch
+	fedora/krb5-1.11-kpasswdtest.patch
+	fedora/krb5-1.14-Support-KDC_ERR_MORE_PREAUTH_DATA_REQUIRED.patch
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.12.1-cygwin-in_pktinfo.patch
@@ -19,6 +28,8 @@ PATCH_URI="
 	1.12.1-cygwin-profile.h.patch
 "
 
+CFLAGS+=" -DFD_SETSIZE=1024"
+
 src_compile() {
 	cd ${S}/src
 	cygautoreconf
@@ -26,11 +37,14 @@ src_compile() {
 	CYGCONF_SOURCE=${S}/src
 	cygconf \
 		--enable-dns-for-realm \
-		--enable-pkinit --with-pkinit-crypto-impl=openssl \
+		--enable-pkinit \
+		--with-pkinit-crypto-impl=openssl \
+		--with-tls-impl=openssl \
 		--with-ldap \
 		--with-system-et \
 		--with-system-ss \
-		--with-system-verto
+		--with-system-verto \
+		krb5_cv_cc_flag__dash_Werror_eq_uninitialized=no
 	cygmake
 }
 
@@ -49,18 +63,34 @@ src_install() {
 	dodoc ${S}/doc/html
 }
 
-PKG_NAMES="krb5-workstation krb5-server krb5-doc libgssapi_krb5_2 libgssrpc4
-	libk5crypto3 libkadm5clnt_mit9 libkadm5srv_mit9 libkdb5_7 libkrad0
-	libkrb5_3 libkrb5support0 libkrb5-devel"
+PKG_NAMES="krb5-workstation krb5-server krb5-server-ldap krb5-pkinit krb5-k5tls
+	krb5-samples krb5-doc libgssapi_krb5_2 libgssrpc4 libk5crypto3
+	libkadm5clnt_mit9 libkadm5srv_mit9 libkdb5_8 libkrad0 libkrb5_3
+	libkrb5support0 libkrb5-devel"
 krb5_workstation_CATEGORY="Net"
 krb5_workstation_SUMMARY="${SUMMARY} clients"
-krb5_workstation_CONTENTS="--exclude=examples --exclude=html --exclude=*.dll
-	--exclude=krb5-config* usr/bin/ usr/share/doc/ usr/share/locale/
-	usr/share/man/man1/ usr/share/man/man5/krb5.conf.5*"
+krb5_workstation_CONTENTS="--exclude=examples --exclude=html --exclude=cyg*.dll
+	--exclude=krb5-config* usr/bin/k* usr/share/doc/ usr/share/locale/
+	usr/share/man/man1/k* usr/share/man/man5/krb5.conf.5*"
 krb5_server_CATEGORY="Net"
 krb5_server_SUMMARY="${SUMMARY} server"
-krb5_server_CONTENTS="--exclude=krb5.conf* usr/bin/cygkdb_ldap-*.dll usr/sbin/
-	usr/lib/krb5/plugins/ usr/share/man/man5/ usr/share/man/man8/"
+krb5_server_CONTENTS="--exclude=krb5.conf* --exclude=kdb5_ldap_util*
+	usr/sbin/k*
+	usr/lib/krb5/plugins/kdb/db2.dll
+	usr/lib/krb5/plugins/preauth/otp.dll
+	usr/share/man/man5/ usr/share/man/man8/k*"
+krb5_server_ldap_CATEGORY="Net"
+krb5_server_ldap_SUMMARY="${SUMMARY} server (LDAP support)"
+krb5_server_ldap_CONTENTS="usr/bin/cygkdb_ldap-*.dll
+	usr/lib/krb5/plugins/kdb/kldap.dll
+	usr/sbin/kdb5_ldap_util.exe
+	usr/share/man/man8/kdb5_ldap_util.8*"
+krb5_pkinit_SUMMARY="${SUMMARY} (PKCS#11 plugin)"
+krb5_pkinit_CONTENTS="usr/lib/krb5/plugins/preauth/pkinit.dll"
+krb5_k5tls_SUMMARY="${SUMMARY} (TLS plugin)"
+krb5_k5tls_CONTENTS="usr/lib/krb5/plugins/tls/k5tls.dll"
+krb5_samples_SUMMARY="${SUMMARY} (sample servers and clients)"
+krb5_samples_CONTENTS="usr/bin/*client.exe usr/sbin/*server.exe usr/share/man/man*/s*"
 krb5_doc_CATEGORY="Doc"
 krb5_doc_CONTENTS="usr/share/doc/krb5/*/"
 libgssapi_krb5_2_SUMMARY="${SUMMARY} GSS-API library"
@@ -73,8 +103,8 @@ libkadm5clnt_mit9_SUMMARY="${SUMMARY} administration client library"
 libkadm5clnt_mit9_CONTENTS="usr/bin/cygkadm5clnt_mit-9.dll"
 libkadm5srv_mit9_SUMMARY="${SUMMARY} administration server library"
 libkadm5srv_mit9_CONTENTS="usr/bin/cygkadm5srv_mit-9.dll"
-libkdb5_7_SUMMARY="${SUMMARY} database library"
-libkdb5_7_CONTENTS="usr/bin/cygkdb5-7.dll"
+libkdb5_8_SUMMARY="${SUMMARY} database library"
+libkdb5_8_CONTENTS="usr/bin/cygkdb5-8.dll"
 libkrad0_SUMMARY="${SUMMARY} RADIUS library"
 libkrad0_CONTENTS="usr/bin/cygkrad-0.dll"
 libkrb5_3_SUMMARY="${SUMMARY} library"
