@@ -1,5 +1,5 @@
 NAME="krb5"
-VERSION=1.13.1
+VERSION=1.13.2
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
@@ -8,7 +8,7 @@ provide strong authentication for client/server applications by using secret-
 key cryptography."
 HOMEPAGE="http://web.mit.edu/kerberos/"
 #SRC_URI="http://web.mit.edu/kerberos/dist/krb5/${VERSION%.*}/krb5-${VERSION}-signed.tar"
-md5sum=317dc7db815f1e4ad611c6a519589edd
+md5sum=f9b9275c6ceb9e6c39fabecc00c6a059
 SRC_URI="http://pkgs.fedoraproject.org/repo/pkgs/krb5/krb5-${VERSION}.tar.gz/${md5sum}/krb5-${VERSION}.tar.gz"
 PATCH_URI="
 	fedora/krb5-1.12-ksu-path.patch
@@ -20,6 +20,7 @@ PATCH_URI="
 	fedora/krb5-kvno-230379.patch
 	fedora/krb5-1.11-kpasswdtest.patch
 	fedora/krb5-1.14-Support-KDC_ERR_MORE_PREAUTH_DATA_REQUIRED.patch
+	fedora/krb5-tests_use_libs_from_build.patch
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.12.1-cygwin-in_pktinfo.patch
