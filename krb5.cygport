@@ -1,6 +1,6 @@
 NAME="krb5"
 VERSION=1.13.2
-RELEASE=1
+RELEASE=2
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
 DESCRIPTION="Kerberos is a network authentication protocol. It is designed to
@@ -21,6 +21,11 @@ PATCH_URI="
 	fedora/krb5-1.11-kpasswdtest.patch
 	fedora/krb5-1.14-Support-KDC_ERR_MORE_PREAUTH_DATA_REQUIRED.patch
 	fedora/krb5-tests_use_libs_from_build.patch
+	fedora/krb5-1.13.3-bindresvport_sa_port_byte_swap_bug_triggering_selinux_avc_denial.patch
+	fedora/krb5-1.14-client_referral_principal.patch
+	fedora/krb5-CVE-2015-2695-SPNEGO_aliasing.patch
+	fedora/krb5-CVE-2015-2696-IAKERB_aliasing.patch
+	fedora/krb5-CVE-2015-2697-build_principal_memory.patch
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.12.1-cygwin-in_pktinfo.patch
