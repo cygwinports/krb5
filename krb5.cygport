@@ -3,9 +3,9 @@ VERSION=1.13.2
 RELEASE=2
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
-DESCRIPTION="Kerberos is a network authentication protocol. It is designed to
-provide strong authentication for client/server applications by using secret-
-key cryptography."
+DESCRIPTION="This is the reference implementation of the Kerberos network
+authentication protocol from MIT. It is designed to provide strong
+authentication for client/server applications by using secret-key cryptography."
 HOMEPAGE="http://web.mit.edu/kerberos/"
 #SRC_URI="http://web.mit.edu/kerberos/dist/krb5/${VERSION%.*}/krb5-${VERSION}-signed.tar"
 md5sum=f9b9275c6ceb9e6c39fabecc00c6a059
