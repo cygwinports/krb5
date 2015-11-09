@@ -1,6 +1,6 @@
 NAME="krb5"
 VERSION=1.13.2
-RELEASE=2
+RELEASE=3
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
 DESCRIPTION="This is the reference implementation of the Kerberos network
@@ -26,6 +26,7 @@ PATCH_URI="
 	fedora/krb5-CVE-2015-2695-SPNEGO_aliasing.patch
 	fedora/krb5-CVE-2015-2696-IAKERB_aliasing.patch
 	fedora/krb5-CVE-2015-2697-build_principal_memory.patch
+	fedora/krb5-CVE-2015-2698-fix_iakerb_spnego.patch
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.12.1-cygwin-in_pktinfo.patch
