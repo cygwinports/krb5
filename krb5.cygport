@@ -1,6 +1,6 @@
 NAME="krb5"
 VERSION=1.14.1
-RELEASE=1
+RELEASE=2
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
 DESCRIPTION="This is the reference implementation of the Kerberos network
@@ -26,6 +26,10 @@ PATCH_URI="
 	fedora/krb5-1.14.1-interpose-public_oid_fixups.patch
 	fedora/krb5-1.14.2-Revisit-inquire_attrs_for_mech-on-old-mechs.patch
 	fedora/krb5-CVE-2016-3119.patch
+	fedora/krb5-1.15-kdc_send_receive_hooks.patch
+	fedora/krb5-1.15-kdc_hooks_test.patch
+	fedora/krb5-1.14.3-fix_otp_as_key.patch
+	fedora/krb5-1.14.3-krad-recv.patch
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.12.1-cygwin-in_pktinfo.patch
@@ -64,6 +68,9 @@ src_install() {
 
 	# internal library
 	rm -f ${D}/usr/lib/libkdb_ldap.dll.a
+
+	# only for tests
+	rm -f ${D}/usr/lib/krb5/plugins/preauth/test.dll
 
 	dodoc ${S}/doc/html
 }
