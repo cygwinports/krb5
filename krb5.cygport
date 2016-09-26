@@ -1,6 +1,6 @@
 NAME="krb5"
-VERSION=1.14.1
-RELEASE=2
+VERSION=1.14.4
+RELEASE=1
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
 DESCRIPTION="This is the reference implementation of the Kerberos network
@@ -8,7 +8,7 @@ authentication protocol from MIT. It is designed to provide strong
 authentication for client/server applications by using secret-key cryptography."
 HOMEPAGE="http://web.mit.edu/kerberos/"
 #SRC_URI="http://web.mit.edu/kerberos/dist/krb5/${VERSION%.*}/krb5-${VERSION}-signed.tar"
-md5sum=400de0cabbfbe85c2c36f60347bf7dc6
+md5sum=ba90f5701fc2dda76133c1f34ba4ee80
 SRC_URI="http://pkgs.fedoraproject.org/repo/pkgs/krb5/krb5-${VERSION}.tar.gz/${md5sum}/krb5-${VERSION}.tar.gz"
 PATCH_URI="
 	fedora/krb5-1.12-ksu-path.patch
@@ -18,18 +18,13 @@ PATCH_URI="
 	fedora/krb5-1.13-dirsrv-accountlock.patch
 	fedora/krb5-1.9-debuginfo.patch
 	fedora/krb5-1.11-kpasswdtest.patch
-	fedora/krb5-disable_ofd_locks.patch
-	fedora/krb5-acquire_cred_interposer.patch
-	fedora/krb5-1.14.1-interpose-enable-inquire_attrs_for_mech.patch
-	fedora/krb5-1.14.1-interpose-fix-inquire_attrs_for_mech.patch
-	fedora/krb5-1.14.1-interpose-inquire_saslname_for_mech.patch
-	fedora/krb5-1.14.1-interpose-public_oid_fixups.patch
-	fedora/krb5-1.14.2-Revisit-inquire_attrs_for_mech-on-old-mechs.patch
-	fedora/krb5-CVE-2016-3119.patch
-	fedora/krb5-1.15-kdc_send_receive_hooks.patch
-	fedora/krb5-1.15-kdc_hooks_test.patch
-	fedora/krb5-1.14.3-fix_otp_as_key.patch
-	fedora/krb5-1.14.3-krad-recv.patch
+	fedora/Fix-impersonate_name-to-work-with-interposers.patch
+	fedora/Add-KDC-pre-send-and-post-receive-KDC-hooks.patch
+	fedora/Add-tests-for-send-and-receive-sendto_kdc-hooks.patch
+	fedora/Set-prompt-type-for-OTP-preauth-prompt.patch
+	fedora/Improve-bad-password-inference-in-kinit.patch
+	fedora/Change-KDC-error-for-encrypted-timestamp-preauth.patch
+	fedora/Add-krb5_db_register_keytab.patch
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.12.1-cygwin-in_pktinfo.patch
