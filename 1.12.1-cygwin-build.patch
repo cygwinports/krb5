@@ -225,21 +225,6 @@
  SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(KADMSRV_LIBS) $(SUPPORT_LIB) $(LIBS) @DB_EXTRA_LIBS@
  
  DBDIR = libdb2
---- origsrc/krb5-1.12.1/src/plugins/kdb/hdb/Makefile.in	2014-01-15 18:44:15.000000000 -0600
-+++ src/krb5-1.12.1/src/plugins/kdb/hdb/Makefile.in	2014-05-18 15:09:56.536961000 -0500
-@@ -14,9 +14,9 @@ RELDIR=../plugins/kdb/hdb
- # Also on gssrpc, for xdr stuff.
- SHLIB_EXPDEPS = \
- 	$(GSSRPC_DEPLIBS) \
--	$(TOPLIBD)/libkdb5$(SHLIBEXT) \
--	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
--	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-+	$(KDB5_DEPLIB) \
-+	$(CRYPTO_DEPLIB) \
-+	$(KRB5_DEPLIB)
- SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkdb5 -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(SUPPORT_LIB) $(LIBS) @DB_EXTRA_LIBS@
- 
- SRCS= \
 --- origsrc/krb5-1.12.1/src/plugins/kdb/ldap/Makefile.in	2014-01-15 18:44:15.000000000 -0600
 +++ src/krb5-1.12.1/src/plugins/kdb/ldap/Makefile.in	2014-05-18 15:10:25.665627000 -0500
 @@ -14,16 +14,16 @@ RELDIR=../plugins/kdb/ldap
@@ -278,19 +263,6 @@
  SHLIB_EXPLIBS= $(KADMSRV_LIBS) -lkrb5 -lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) $(LDAP_LIBS) $(LIBS)
  
  LIBINITFUNC= kldap_init_fn
---- origsrc/krb5-1.12.1/src/plugins/preauth/cksum_body/Makefile.in	2014-01-15 18:44:15.000000000 -0600
-+++ src/krb5-1.12.1/src/plugins/preauth/cksum_body/Makefile.in	2014-05-18 15:10:35.380182700 -0500
-@@ -8,8 +8,8 @@ LIBMINOR=0
- RELDIR=../plugins/preauth/cksum_body
- # Depends on libk5crypto and libkrb5
- SHLIB_EXPDEPS = \
--	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
--	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-+	$(CRYPTO_DEPLIB) \
-+	$(KRB5_DEPLIB)
- SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
- 
- STLIBOBJS=cksum_body_main.o
 --- origsrc/krb5-1.12.1/src/plugins/preauth/otp/Makefile.in	2014-01-15 18:44:15.000000000 -0600
 +++ src/krb5-1.12.1/src/plugins/preauth/otp/Makefile.in	2014-05-18 15:10:42.777605800 -0500
 @@ -8,7 +8,7 @@ LIBMINOR=0
@@ -328,16 +300,3 @@
  ACELIB= -laceclnt
  SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(KADMSRV_LIBS) \
  	$(LIBS) $(ACELIB)
---- origsrc/krb5-1.12.1/src/plugins/preauth/wpse/Makefile.in	2014-01-15 18:44:15.000000000 -0600
-+++ src/krb5-1.12.1/src/plugins/preauth/wpse/Makefile.in	2014-05-18 15:10:55.307322400 -0500
-@@ -8,8 +8,8 @@ LIBMINOR=0
- RELDIR=../plugins/preauth/wpse
- # Depends on libk5crypto and libkrb5
- SHLIB_EXPDEPS = \
--	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
--	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-+	$(CRYPTO_DEPLIB) \
-+	$(KRB5_DEPLIB)
- SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
- 
- STLIBOBJS=wpse_main.o

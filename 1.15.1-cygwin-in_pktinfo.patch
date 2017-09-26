@@ -1,0 +1,11 @@
+--- origsrc/krb5-1.15.1/src/lib/apputils/udppktinfo.c	2017-03-02 16:06:02.000000000 -0600
++++ src/krb5-1.15.1/src/lib/apputils/udppktinfo.c	2017-09-25 16:01:57.514415500 -0500
+@@ -28,7 +28,7 @@
+ #include <netinet/in.h>
+ #include <sys/socket.h>
+ 
+-#if defined(IP_PKTINFO) && defined(HAVE_STRUCT_IN_PKTINFO)
++#if defined(IP_PKTINFO) && defined(HAVE_STRUCT_IN_PKTINFO) && !defined(__CYGWIN__)
+ #define HAVE_IP_PKTINFO
+ #endif
+ 
