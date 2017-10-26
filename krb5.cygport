@@ -1,5 +1,5 @@
 NAME="krb5"
-VERSION=1.15.1
+VERSION=1.15.2
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
@@ -34,11 +34,8 @@ PATCH_URI="
 	fedora/Add-certauth-pluggable-interface.patch
 	fedora/Correct-error-handling-bug-in-prior-commit.patch
 	fedora/Add-k5test-expected_msg-expected_trace.patch
-	fedora/Fix-leaks-in-gss_inquire_cred_by_oid.patch
 	fedora/Add-support-to-query-the-SSF-of-a-GSS-context.patch
-	fedora/Prevent-KDC-unset-status-assertion-failures.patch
 	fedora/Remove-incomplete-PKINIT-OCSP-support.patch
-	fedora/Allow-clock-skew-in-krb5-gss_context_time.patch
 	fedora/Fix-in_clock_skew-and-use-it-in-AS-client-code.patch
 	fedora/Add-timestamp-helper-functions.patch
 	fedora/Make-timestamp-manipulations-y2038-safe.patch
@@ -52,7 +49,8 @@ PATCH_URI="
 	fedora/Fix-certauth-built-in-module-returns.patch
 	fedora/Add-PKINIT-test-case-for-generic-client-cert.patch
 	fedora/Add-hostname-based-ccselect-module.patch
-	fedora/Preserve-GSS-context-on-init-accept-failure.patch
+	fedora/Add-German-translation.patch
+	fedora/Fix-PKINIT-cert-matching-data-construction.patch
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.15.1-cygwin-in_pktinfo.patch
