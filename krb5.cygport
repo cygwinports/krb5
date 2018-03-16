@@ -1,6 +1,6 @@
 NAME="krb5"
 VERSION=1.15.2
-RELEASE=1
+RELEASE=2
 CATEGORY="Libs"
 SUMMARY="Kerberos reference implementation"
 DESCRIPTION="This is the reference implementation of the Kerberos network
@@ -51,6 +51,8 @@ PATCH_URI="
 	fedora/Add-hostname-based-ccselect-module.patch
 	fedora/Add-German-translation.patch
 	fedora/Fix-PKINIT-cert-matching-data-construction.patch
+	fedora/Process-included-directories-in-alphabetical-order.patch
+	fedora/Fix-flaws-in-LDAP-DN-checking.patch
 	1.12.1-cygwin-build.patch
 	1.12.1-cygwin-plugins.patch
 	1.15.1-cygwin-in_pktinfo.patch
